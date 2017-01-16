@@ -1,13 +1,11 @@
----
-title: "phenoBayes"
-author: "Cornelius Senf"
-date: "13 Januar 2017"
-output: html_document
----
 
-```{r setup, include=FALSE, echo=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series
+
+This repository describes and documents a set of models used to estimate the spatial and temporal variability in vegetation phenology from Landsat data.
+
+**References**
+
+Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series. *Remote Sensing of Environment*
 
 ## Introduction
 
