@@ -9,13 +9,13 @@ simulate_data <- function(t = 1:365, # DOY
                           cs = 0.01, # Pixel variation in end of season
                           d = 270, # End of season (in DOY)
                           ds = 10, # Pixel variation in end of season (in DOY)
-                          vi_0 = 0, # Minimum of VI
+                          vi_0 = 0.1, # Minimum of VI
                           vi_0_s = 0, # Pixel variation in minimum of VI
-                          vi_delta = 0.8, # Magnitude of VI
+                          vi_delta = 0.3, # Magnitude of VI
                           vi_delta_s = 0.01, # Pixel variation in magnitude of VI
-                          l = 0.001, # Greendown parameter
-                          ls = 0.0001, # Pixel variation in greendown parameter
-                          error = 0.1, # Random error term
+                          l = 0.0005, # Greendown parameter
+                          ls = 0.000001, # Pixel variation in greendown parameter
+                          error = 0.001, # Random error term
                           cor_mar = matrix(c(  1.0, -0.5,	 0.5,	 0.0,	 0.0,	 0.0, -0.3,
                                               -0.5,  1.0,	-0.2,	-0.2,	-0.1,	 0.4,	 0.7,
                                                0.5, -0.2,	 1.0,	 0.1,	 0.4,	 0.2,	 0.1,
@@ -27,7 +27,7 @@ simulate_data <- function(t = 1:365, # DOY
                           S = 20, # Variation in number of observations per year
                           Y = 30, # Number of years
                           M = 25, # Number of time series
-                          var_sos = 20, # Annual variation in SOS
+                          var_sos = 10, # Annual variation in SOS
                           var_eos = 0, # Annual variation in EOS
                           var_gup = 0, # Annual variation in GUP
                           var_gse = 0, # Annual variation in GSE
