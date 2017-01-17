@@ -1,11 +1,11 @@
 # Simulate data
 
 simulate_data <- function(t = 1:365, # DOY
-                          a = 0.2, # Green-up
+                          a = 0.15, # Green-up
                           as = 0.1, # Pixel variation in green-up
                           b = 120, # Start of season (in DOY)
                           bs = 10, # Pixel variation in start of season (DOY)
-                          c = 0.2, # Senessence
+                          c = 0.15, # Senessence
                           cs = 0.1, # Pixel variation in end of season
                           d = 270, # End of season (in DOY)
                           ds = 10, # Pixel variation in end of season (in DOY)
@@ -16,15 +16,16 @@ simulate_data <- function(t = 1:365, # DOY
                           l = 0.0005, # Greendown parameter
                           ls = 0.00001, # Pixel variation in greendown parameter
                           error = 0.01, # Random error term
-                          cor_mar = matrix(c(  1.0, -0.6,	 0.6,	 0.3,	 0.6,	-0.3, -0.8,
-                                              -0.6,  1.0,	-0.2,	-0.2,	-0.1,	 0.4,	 0.7,
-                                               0.6, -0.2,	 1.0,	 0.1,	 0.4,	 0.2,	 0.1,
-                                               0.3, -0.2,	 0.1,	 1.0,	 0.4,	 0.3,	 0.1,
-                                               0.6, -0.1,	 0.4,	 0.4,	 1.0,	 0.6,	 0.6,
-                                              -0.3,	 0.4,  0.2,	 0.3,	 0.6,	 1.0,	 0.8,
-                                               0.8,  0.7,	 0.1,	 0.1,	 0.6,	 0.8,	 1.0), ncol = 7, nrow = 7, byrow = TRUE), # Correlation matrix between parameters
+                          # cor_mar = matrix(c(  1.0, -0.6,	 0.6,	 0.3,	 0.6,	-0.3, -0.8,
+                          #                     -0.6,  1.0,	-0.2,	-0.2,	-0.1,	 0.4,	 0.7,
+                          #                      0.6, -0.2,	 1.0,	 0.1,	 0.4,	 0.2,	 0.1,
+                          #                      0.3, -0.2,	 0.1,	 1.0,	 0.4,	 0.3,	 0.1,
+                          #                      0.6, -0.1,	 0.4,	 0.4,	 1.0,	 0.6,	 0.3,
+                          #                     -0.3,	 0.4,  0.2,	 0.3,	 0.6,	 1.0,	 0.8,
+                          #                      0.8,  0.7,	 0.1,	 0.1,	 0.3,	 0.8,	 1.0), ncol = 7, nrow = 7, byrow = TRUE), # Correlation matrix between parameters
+                          cor_mar = matrix(rep(0, 49), ncol = 7, nrow = 7, byrow = TRUE), # Correlation matrix between parameters
                           N = 30, # Average number of observations per year
-                          S = 10, # Variation in number of observations per year
+                          S = 5, # Variation in number of observations per year
                           Y = 30, # Number of years
                           M = 25, # Number of time series
                           var_sos = 10, # Annual variation in SOS
