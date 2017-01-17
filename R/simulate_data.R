@@ -1,26 +1,33 @@
 # Simulate data
 
 simulate_data <- function(t = 1:365, # DOY
-                          a = 0.15, # Green-up
-                          as = 0.005, # Pixel variation in green-up
-                          b = 100, # Start of season (in DOY)
-                          bs = 8, # Pixel variation in start of season (DOY)
-                          c = 0.15, # Senessence
-                          cs = 0.005, # Pixel variation in end of season
+                          a = 0.2, # Green-up
+                          as = 0.01, # Pixel variation in green-up
+                          b = 120, # Start of season (in DOY)
+                          bs = 10, # Pixel variation in start of season (DOY)
+                          c = 0.2, # Senessence
+                          cs = 0.01, # Pixel variation in end of season
                           d = 270, # End of season (in DOY)
-                          ds = 8, # Pixel variation in end of season (in DOY)
+                          ds = 10, # Pixel variation in end of season (in DOY)
                           vi_0 = 0, # Minimum of VI
-                          vi_0_s = 0.01, # Pixel variation in minimum of VI
-                          vi_delta = 0.5, # Magnitude of VI
+                          vi_0_s = 0, # Pixel variation in minimum of VI
+                          vi_delta = 0.8, # Magnitude of VI
                           vi_delta_s = 0.01, # Pixel variation in magnitude of VI
                           l = 0.001, # Greendown parameter
                           ls = 0.0001, # Pixel variation in greendown parameter
-                          error = 0.05, # Random error term
-                          N = 10, # Average number of observations per year
+                          error = 0.1, # Random error term
+                          cor_mar = matrix(c(  1.0, -0.5,	 0.5,	 0.0,	 0.0,	 0.0, -0.3,
+                                              -0.5,  1.0,	-0.2,	-0.2,	-0.1,	 0.4,	 0.7,
+                                               0.5, -0.2,	 1.0,	 0.1,	 0.4,	 0.2,	 0.1,
+                                               0.0, -0.2,	 0.1,	 1.0,	 0.4,	 0.3,	 0.1,
+                                               0.0, -0.1,	 0.4,	 0.4,	 1.0,	 0.6,	 0.6,
+                                               0.0,	 0.4,  0.2,	 0.3,	 0.6,	 1.0,	 0.8,
+                                              -0.3,  0.7,	 0.1,	 0.1,	 0.6,	 0.8,	 1.0), ncol = 7, nrow = 7, byrow = TRUE), # Correlation matrix between parameters
+                          N = 15, # Average number of observations per year
                           S = 20, # Variation in number of observations per year
                           Y = 30, # Number of years
                           M = 25, # Number of time series
-                          var_sos = 8, # Annual variation in SOS
+                          var_sos = 20, # Annual variation in SOS
                           var_eos = 0, # Annual variation in EOS
                           var_gup = 0, # Annual variation in GUP
                           var_gse = 0, # Annual variation in GSE
@@ -38,7 +45,12 @@ simulate_data <- function(t = 1:365, # DOY
   # Define color set
   getPalette <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))
   cols <- getPalette(Y)
-
+  
+  # translate corrleation matrix into co-variance matrix
+  vars <- c(vi_0_s, vi_delta_s, as, bs, cs, ds, ls)
+  
+  covar_mar <- diag(vars) %*% cor_mar %*% diag(vars)
+  
   # Create parameters
   a_var_y <- rnorm(Y, 0, var_gup)
   b_var_y <- rnorm(Y, 0, var_sos)
@@ -67,14 +79,16 @@ simulate_data <- function(t = 1:365, # DOY
     n <- round(rnorm(Y, N, S), 0)
     n[n<0] <- 0
     n_pixels[, k] <- n
-
-    a_var[k] <- rnorm(1, a, as)
-    b_var[k] <- rnorm(1, b, bs)
-    c_var[k] <- rnorm(1, c, cs)
-    d_var[k] <- rnorm(1, d, ds)
-    vi_0_var[k] <- rnorm(1, vi_0, vi_0_s)
-    vi_delta_var[k] <- rnorm(1, vi_delta, vi_delta_s)
-    l_var[k] <- rnorm(1, l, ls)
+    
+    draws <- MASS::mvrnorm(n = 1, c(vi_0, vi_delta, a, b, c, d, l), covar_mar)
+    
+    a_var[k] <- draws[3]
+    b_var[k] <- draws[4]
+    c_var[k] <- draws[5]
+    d_var[k] <- draws[6]
+    vi_0_var[k] <- draws[1]
+    vi_delta_var[k] <- draws[2]
+    l_var[k] <- draws[7]
 
     vi <- vector(mode = "list", Y)
 
@@ -92,7 +106,7 @@ simulate_data <- function(t = 1:365, # DOY
 
       vi_error_select <- vi_error
       vi_error_select[sample(1:length(vi_error), ifelse(length(vi_error) - n[i] < 0, 0, length(vi_error) - n[i]))] <- NA
-      vi_error_select <- data.frame(vi = vi_error_select, y = i, doy = t)
+      vi_error_select <- data.frame(vi = vi_error_select, year = i, doy = t)
       vi[[i]] <- na.omit(vi_error_select)
     }
 
@@ -110,7 +124,7 @@ simulate_data <- function(t = 1:365, # DOY
                            c = c_var,
                            d = d_var,
                            l = l_var,
-                           n = as.numeric(tapply(dat$y, dat$pixel, length)))
+                           n = as.numeric(tapply(dat$year, dat$pixel, length)))
 
   annual_variation <- data.frame(vi_0 = vi_0_var_y,
                                  vi_delta = vi_delta_var_y,
@@ -120,7 +134,7 @@ simulate_data <- function(t = 1:365, # DOY
                                  d = d_var_y,
                                  l = l_var_y)
 
-  p <- ggplot2::ggplot(dat, ggplot2::aes(x = doy, y = vi, col = y)) +
+  p <- ggplot2::ggplot(dat, ggplot2::aes(x = doy, y = vi, col = year)) +
     ggplot2::geom_point(size = 1) +
     ggplot2::facet_wrap(~pixel) +
     ggplot2::xlab("\nDay of year") +
