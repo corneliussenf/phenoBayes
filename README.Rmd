@@ -9,7 +9,7 @@ Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hi
 
 ## Introduction
 
-Yet there is only one type of models implemented, the **base phenological model**. The base phenological model takes a sample of dense Landsat time series and estimates the spatial variation in five phenological parameters either for the start of season or for the end of season (season spectral minimum, season spectral magnitude, start/end of season, green-up/senessence rate, and summer green-down). Moreover, the model estimates the temporal (inter-annual) variation in the start/end of season parameter. That way, changes in spring phenology (changes in leave-out/browning under climate change) can be investigated over the time period 1985 to 2016 at any location in the world.
+Yet there is only one type of models implemented, the **base phenological model**. The base phenological model takes a sample of dense Landsat time series and estimates a set of five spring phenological parameters (season spectral minimum, season spectral magnitude, start of season, green-up rate, and summer green-down). Simultaneously, the model estimates the temporal (inter-annual) variation in the start of season parameter as random effect. That way, changes in spring phenology can be investigated over the time period 1985 to 2016 at any location in the world.
 
 In order to run the models you need to first install `rstan`. Information on how to installing `rstan` on you machine can be found here: https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started.
 
@@ -132,3 +132,11 @@ ggplot(beta_summary, aes(x = factor(pixel), y = Q50)) +
   labs(x = "Pixel", y = "Estimate") +
   facet_wrap(~parameter, scales = "free")
 ```
+
+## Future models
+
+We will gradually add a variety of models:
+
+- A base autumn model
+- Spring/autumn models containing temporal predictors (i.e., climate)
+- Spring/autumn models containing spatial predictors (i.e., topography)
