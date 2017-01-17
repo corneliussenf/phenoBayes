@@ -1,7 +1,7 @@
 
-# A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series
+# phenoBayes: Bayesian hierarchical models for estimating spatial and temporal patterns in vegetation phenology from Landsat time series
 
-This repository describes and documents a set of models used to estimate the spatial and temporal variability in vegetation phenology from Landsat data.
+This repository describes and documents a set of models used to estimate spatial and temporal patterns in vegetation phenology from Landsat data.
 
 **References**
 
@@ -9,10 +9,62 @@ Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hi
 
 ## Introduction
 
-Test2...
+Yet there is only one type of models implemented, the *base phenological model*. The base phenological model takes a sample of dense Landsat time series and estimates the spatial variation in five phenological parameters either for the start of season or for the end of season (season spectral minimum, season spectral magnitude, start/end of season, green-up/senessence rate, and summer green-down). Moreover, the model estimates the temporal (inter-annual) variation in the start/end of season parameter. That way, changes in spring phenology (changes in leave-out/browning under climate change) can be investigated over the time period 1985 to 2016 at any location in the world.
 
-## Basemodel
+In order to run the models you need to first install `rstan`. Information on how to installing `rstan` on you machine can be found here: https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started.
+
+## Base phenological model
 
 ### Simulated data
 
+Using the `simulate_data` function in the R-code folder we can simulate a set of time series resembling the properties of Landsat time series acquired over a braodleaved forest. There are several parameters that can be adjusted, yet we stick to the defaults and simluate 9 time series.
+
+```{r}
+source("R/simulate_data.R")
+
+dat <- simulate_data(M = 9)
+```
+
+The function returns a list containing 1) a data frame with the simulated data, 2) the parameters used for creating the simulated data, and 3) a plot of the simulated data.
+
+Using the simulated data we can set up the model via the rstan interface. The  base phenological model for the start of season is called **base_pheno_sos.stan** and is located in the Stan folder:
+
+```{r}
+library(rstan)
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = 4)
+
+dat_spring <- subset(dat$data, dat$data$doy <= 200)
+
+mu_beta <- matrix(c(0, # Season minimum 
+                    0.5, # Season amplitude
+                    0.15, # Green-up rate
+                    100, # Start of season
+                    0.001), # Summer green-down
+                  ncol = max(dat_spring$pixel), nrow = 5)
+
+datalist <- list(N = nrow(dat_spring),
+                 NY = max(dat_spring$year),
+                 NP = max(dat_spring$pixel),
+                 doy = dat_spring$doy,
+                 vi = dat_spring$vi,
+                 year = dat_spring$year,
+                 pixel = dat_spring$pixel,
+                 mu_beta = mu_beta)
+
+fit <- stan(file = "Stan/pheno_base_sos.stan", data = datalist, iter = 2000, chains = 4)
+```
+
+Note that we first subset the data to only include winter and spring observations. This step simply reduces the number of data points and thus the computational resources needed for sampling the posteriors. Second, we define a vector used for centering the five phenological parameters. An informative centering vector significantly increases the sampling process. The vector can be formulated based on prior knowledge or based on other data sources (i.e., climate data or phenological records). Here we set the vector according to the parameters used to simulate the time series. Third, we need to translate the data into a list in order to call it with Stan. The data list is then called together with the phenological model in the final line. The sampling is set to 2,000 interations (including 1,000 warm-up iterations) and four chains (run in parallel).
+
+We can inspect the posteriors using the ...
+
 ### Real data
+
+We repeat the above shown exercise with real Landsat data aquired over braodleaved forest stands in the Bavarian Forest National Park in southern Germany. The data set is located in the data folder and stored as RData object. The data totals 100 Enhanced Vegetation Index (EVI) time series and are identical to the data used in the above mentioned publication.
+
+```{r}
+load("data/landsat_broadleaved_bavarian_forest.RData")
+```
+
