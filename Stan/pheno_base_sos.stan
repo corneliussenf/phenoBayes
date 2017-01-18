@@ -7,6 +7,7 @@ data {
   int<lower=0, upper=NY> year[N]; // Observation year
   int<lower=0, upper=NP> pixel[N]; // Observation pixel
   matrix[5, NP] mu_beta; # Centering of beta
+  row_vector[5] sigma_beta_scale; # Scaling of sigma_beta
 }
 
 parameters {
@@ -39,8 +40,15 @@ transformed parameters {
   // Correlation matrix for beta
   matrix[5, 5] cor_beta;
   
+  // Scaled sigma_beta
+  vector[5] sigma_beta_scaled;
+  
+  // Scale sigma_beta
+  for(i in 1:5)
+    sigma_beta_scaled[i] = sigma_beta[1] * sigma_beta_scale[i];
+    
   // Cholesky factorization of beta (incl. centering of beta)
-  beta = diag_pre_multiply(sigma_beta, cor_beta_L) * beta_raw + mu_beta;
+  beta = diag_pre_multiply(sigma_beta_scaled, cor_beta_L) * beta_raw + mu_beta;
   
   // Backtransform Cholesky correlation matrix (LL') of beta 
   cor_beta = tcrossprod(cor_beta_L);
@@ -58,11 +66,12 @@ model {
   cor_beta_L ~ lkj_corr_cholesky(2.0);
   
   // Prior for scales of beta
-  sigma_beta[1] ~ cauchy(0, 0.1);
-  sigma_beta[2] ~ cauchy(0, 0.1);
-  sigma_beta[3] ~ cauchy(0, 0.1);
-  sigma_beta[4] ~ cauchy(0, 5);
-  sigma_beta[5] ~ cauchy(0, 0.1);
+  sigma_beta ~ cauchy(0, 1);
+  //sigma_beta[1] ~ cauchy(0, 0.1);
+  //sigma_beta[2] ~ cauchy(0, 0.1);
+  //sigma_beta[3] ~ cauchy(0, 0.1);
+  //sigma_beta[4] ~ cauchy(0, 5);
+  //sigma_beta[5] ~ cauchy(0, 0.1);
   
   // Prior for phi
   phi ~ normal(0, sigma_phi);
