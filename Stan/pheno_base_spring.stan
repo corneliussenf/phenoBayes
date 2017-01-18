@@ -67,11 +67,6 @@ model {
   
   // Prior for scales of beta
   sigma_beta ~ cauchy(0, 1);
-  //sigma_beta[1] ~ cauchy(0, 0.1);
-  //sigma_beta[2] ~ cauchy(0, 0.1);
-  //sigma_beta[3] ~ cauchy(0, 0.1);
-  //sigma_beta[4] ~ cauchy(0, 5);
-  //sigma_beta[5] ~ cauchy(0, 0.1);
   
   // Prior for phi
   phi ~ normal(0, sigma_phi);

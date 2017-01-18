@@ -31,7 +31,7 @@ dat_spring <- subset(dat$data, dat$data$doy <= 200)
 
 The function returns a list containing 1) a data frame with the simulated data, 2) the parameters used for creating the simulated data, and 3) a plot of the simulated data. Following the simulation of the data, we subset the data to only include winter and spring observations. This step simply reduces the number of data points and thus the computational resources needed for sampling the posteriors. 
 
-Using the simulated data we can set up the model via the `rstan` interface. The  base phenological model for the start of season is called *base_pheno_sos.stan* and is located in the Stan folder:
+Using the simulated data we can set up the model via the `rstan` interface. The  base phenological model for the start of season is called *base_pheno_spring.stan* and is located in the Stan folder:
 
 ```{r}
 library(rstan)
@@ -58,7 +58,7 @@ datalist <- list(N = nrow(dat_spring),
                  mu_beta = mu_beta,
                  sigma_beta_scale = sigma_beta_scale)
 
-fit <- stan(file = "Stan/pheno_base_sos.stan", data = datalist, iter = 2000, chains = 4)
+fit <- stan(file = "Stan/pheno_base_spring.stan", data = datalist, iter = 2000, chains = 4)
 ```
 
 First, we load the `rstan` library and tell the package to use four cores in parallel. Second, we define two vectors used for centering and scaling the five phenological parameters. This step is purely for numerical reasons and giving an informative centering and scaling vector significantly increases sampling speed. The vectors can be formulated based on prior knowledge or based on other data sources (i.e., climate data or phenological records). Here we set the vector according to the parameters used to simulate the time series. Third, we need to translate the data into a list in order to call it with `rstan` The data list is then given to the `stan` function together with the phenological model in the final line. The sampling is set to 2,000 interations (including 1,000 warm-up iterations) and four chains (run in parallel using four cores).
