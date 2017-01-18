@@ -39,12 +39,14 @@ library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = 4)
 
-mu_beta <- matrix(c(0.1, # Season minimum 
-                    0.3, # Season amplitude
-                    0.2, # Green-up rate
+mu_beta <- matrix(c(0, # Season minimum 
+                    0.5, # Season amplitude
+                    0.15, # Green-up rate
                     120, # Start of season
                     0.0005), # Summer green-down
                   ncol = max(dat_spring$pixel), nrow = 5)
+
+sigma_beta_scale <- c(0.1, 0.1, 0.1, 5, 0.001)
 
 datalist <- list(N = nrow(dat_spring),
                  NY = max(dat_spring$year),
@@ -53,14 +55,15 @@ datalist <- list(N = nrow(dat_spring),
                  vi = dat_spring$vi,
                  year = dat_spring$year,
                  pixel = dat_spring$pixel,
-                 mu_beta = mu_beta)
+                 mu_beta = mu_beta,
+                 sigma_beta_scale = sigma_beta_scale)
 
-fit <- stan(file = "Stan/pheno_base_sos.stan", data = datalist, iter = 1000, chains = 4)
+fit <- stan(file = "Stan/pheno_base_sos.stan", data = datalist, iter = 2000, chains = 4)
 ```
 
-First, we load the `rstan` library and tell the package to use four cores in parallel. Second, we define a vector used for centering the five phenological parameters. An informative centering vector significantly increases the sampling process. The vector can be formulated based on prior knowledge or based on other data sources (i.e., climate data or phenological records). Here we set the vector according to the parameters used to simulate the time series. Third, we need to translate the data into a list in order to call it with `rstan` The data list is then given to the `stan` function together with the phenological model in the final line. The sampling is set to 2,000 interations (including 1,000 warm-up iterations) and four chains (run in parallel using four cores).
+First, we load the `rstan` library and tell the package to use four cores in parallel. Second, we define two vectors used for centering and scaling the five phenological parameters. This step is purely for numerical reasons and giving an informative centering and scaling vector significantly increases sampling speed. The vectors can be formulated based on prior knowledge or based on other data sources (i.e., climate data or phenological records). Here we set the vector according to the parameters used to simulate the time series. Third, we need to translate the data into a list in order to call it with `rstan` The data list is then given to the `stan` function together with the phenological model in the final line. The sampling is set to 2,000 interations (including 1,000 warm-up iterations) and four chains (run in parallel using four cores).
 
-There are several checks you need to perform on the resulting `stanfit` object in order to trust your results (i.e., convergence of chains, mixing between chains, among others). We won't go into detail here, but we strongly recommend reading the `rstan` documentation: https://cran.r-project.org/web/packages/rstan/vignettes/rstan.html
+There are several checks you need to perform on the resulting `stanfit` object in order to trust your results (i.e., convergence of chains, mixing between chains, among others). We won't go into detail here, but we strongly recommend reading the `rstan` documentation: https://cran.r-project.org/web/packages/rstan/vignettes/rstan.html. Anyways, a relativel frequent convergence issue is called **divergent transitions**. Divergent trasitions indicate a serious problem that can either be erased by adapting the sampler settings (see: http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup) or by giving a more informative centering and scaling vector.
 
 We can inspect the posteriors using the `parameter_summary` function in the R folder. In particular, we can inspect the temporal variation in the start of season by plotting its median and 95% credible interval over the years:
 
@@ -98,6 +101,8 @@ dat_spring <- filter(dat, doy <= 200)
 
 mu_beta <- matrix(c(0, 0.3, 0.15, 120, 0), ncol = max(dat$pixel), nrow = 5)
 
+sigma_beta_scale <- c(0.1, 0.1, 0.1, 10, 0.001)
+
 datalist <- list(N = nrow(dat_spring),
                  NY = max(dat_spring$year_index),
                  NP = max(dat_spring$pixel),
@@ -105,7 +110,8 @@ datalist <- list(N = nrow(dat_spring),
                  vi = dat_spring$evi,
                  year = dat_spring$year_index,
                  pixel = dat_spring$pixel,
-                 mu_beta = mu_beta)
+                 mu_beta = mu_beta,
+                 sigma_beta_scale = sigma_beta_scale)
 
 fit <- stan(file = "Stan/pheno_base_sos.stan", data = datalist, iter = 2000, chains = 4)
 ```

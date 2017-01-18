@@ -2,28 +2,21 @@
 
 simulate_data <- function(t = 1:365, # DOY
                           a = 0.15, # Green-up
-                          as = 0.1, # Pixel variation in green-up
+                          as = 0.05, # Pixel variation in green-up
                           b = 120, # Start of season (in DOY)
                           bs = 10, # Pixel variation in start of season (DOY)
                           c = 0.15, # Senessence
-                          cs = 0.1, # Pixel variation in end of season
+                          cs = 0.01, # Pixel variation in end of season
                           d = 270, # End of season (in DOY)
                           ds = 10, # Pixel variation in end of season (in DOY)
-                          vi_0 = 0.1, # Minimum of VI
+                          vi_0 = 0, # Minimum of VI
                           vi_0_s = 0, # Pixel variation in minimum of VI
-                          vi_delta = 0.3, # Magnitude of VI
-                          vi_delta_s = 0.1, # Pixel variation in magnitude of VI
+                          vi_delta = 0.4, # Magnitude of VI
+                          vi_delta_s = 0.05, # Pixel variation in magnitude of VI
                           l = 0.0005, # Greendown parameter
                           ls = 0.00001, # Pixel variation in greendown parameter
                           error = 0.01, # Random error term
-                          # cor_mar = matrix(c(  1.0, -0.6,	 0.6,	 0.3,	 0.6,	-0.3, -0.8,
-                          #                     -0.6,  1.0,	-0.2,	-0.2,	-0.1,	 0.4,	 0.7,
-                          #                      0.6, -0.2,	 1.0,	 0.1,	 0.4,	 0.2,	 0.1,
-                          #                      0.3, -0.2,	 0.1,	 1.0,	 0.4,	 0.3,	 0.1,
-                          #                      0.6, -0.1,	 0.4,	 0.4,	 1.0,	 0.6,	 0.3,
-                          #                     -0.3,	 0.4,  0.2,	 0.3,	 0.6,	 1.0,	 0.8,
-                          #                      0.8,  0.7,	 0.1,	 0.1,	 0.3,	 0.8,	 1.0), ncol = 7, nrow = 7, byrow = TRUE), # Correlation matrix between parameters
-                          cor_mar = matrix(rep(0, 49), ncol = 7, nrow = 7, byrow = TRUE), # Correlation matrix between parameters
+                          cor_mar = NULL, # Correlation matrix between parameters
                           N = 30, # Average number of observations per year
                           S = 5, # Variation in number of observations per year
                           Y = 30, # Number of years
@@ -48,6 +41,10 @@ simulate_data <- function(t = 1:365, # DOY
   cols <- getPalette(Y)
   
   # translate corrleation matrix into co-variance matrix
+  if(is.null(cor_mar)) {
+    cor_mar <- matrix(rep(0, 49), ncol = 7, nrow = 7, byrow = TRUE)
+    diag(cor_mar) <- 1
+  }
   vars <- c(vi_0_s, vi_delta_s, as, bs, cs, ds, ls)
   
   covar_mar <- diag(vars) %*% cor_mar %*% diag(vars)
@@ -118,22 +115,23 @@ simulate_data <- function(t = 1:365, # DOY
 
   dat <- do.call("rbind", dat)
 
-  parameters <- data.frame(vi_0 = vi_0_var,
-                           vi_delta = vi_delta_var,
-                           a = a_var,
-                           b = b_var,
-                           c = c_var,
-                           d = d_var,
-                           l = l_var,
+  parameters <- data.frame(pixel = 1:M,
+                           b1 = vi_0_var,
+                           b2 = vi_delta_var,
+                           b3 = a_var,
+                           b4 = b_var,
+                           b5 = c_var,
+                           b6 = d_var,
+                           b7 = l_var,
                            n = as.numeric(tapply(dat$year, dat$pixel, length)))
 
-  annual_variation <- data.frame(vi_0 = vi_0_var_y,
-                                 vi_delta = vi_delta_var_y,
-                                 a = a_var_y,
-                                 b = b_var_y,
-                                 c = c_var_y,
-                                 d = d_var_y,
-                                 l = l_var_y)
+  annual_variation <- data.frame(b1 = vi_0_var_y,
+                                 b2 = vi_delta_var_y,
+                                 b3 = a_var_y,
+                                 b4 = b_var_y,
+                                 b5 = c_var_y,
+                                 b6 = d_var_y,
+                                 b7 = l_var_y)
 
   p <- ggplot2::ggplot(dat, ggplot2::aes(x = doy, y = vi, col = year)) +
     ggplot2::geom_point(size = 1) +
