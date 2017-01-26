@@ -7,6 +7,21 @@ This repository describes and documents a set of models used to estimate spatial
 
 Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series. *Remote Sensing of Environment*
 
+**Cite the code**
+
+If you use the code you might want to cite it using the following DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.260099.svg)](https://doi.org/10.5281/zenodo.260099)
+
+**License**
+
+[![Creative Commons License][image-1]][1] 
+
+This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International][1].
+ 
+ [1]:    https://creativecommons.org/licenses/by-sa/4.0/
+ 
+ [image-1]:    https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png
+
+
 ## Introduction
 
 Yet there is only one type of models implemented, the **base phenological model**. The base phenological model takes a sample of dense Landsat time series and estimates a set of five spring phenological parameters (season spectral minimum, season spectral magnitude, start of season, green-up rate, and summer green-down). Simultaneously, the model estimates the temporal (inter-annual) variation in the start of season parameter as random effect. That way, changes in spring phenology can be investigated over the time period 1985 to 2016 at any location in the world.
