@@ -9,18 +9,14 @@ Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hi
 
 **Cite the code**
 
-If you use the code you might want to cite it using the following DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.260099.svg)](https://doi.org/10.5281/zenodo.260099)
+If you use the code you might want to cite it using the following DOI:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.260099.svg)](https://doi.org/10.5281/zenodo.260099)
 
 **License**
 
-[![Creative Commons License][image-1]][1] 
-
 This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International][1].
- 
- [1]:    https://creativecommons.org/licenses/by-sa/4.0/
- 
- [image-1]:    https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png
-
+[1]:    https://creativecommons.org/licenses/by-sa/4.0/
 
 ## Introduction
 
