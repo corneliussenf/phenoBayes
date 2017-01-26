@@ -11,7 +11,7 @@ Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hi
 
 Yet there is only one type of models implemented, the **base phenological model**. The base phenological model takes a sample of dense Landsat time series and estimates a set of five spring phenological parameters (season spectral minimum, season spectral magnitude, start of season, green-up rate, and summer green-down). Simultaneously, the model estimates the temporal (inter-annual) variation in the start of season parameter as random effect. That way, changes in spring phenology can be investigated over the time period 1985 to 2016 at any location in the world.
 
-In order to run the models you need to first install `rstan`. Information on how to installing `rstan` on your machine can be found here: https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started.
+In order to run the models presented here, you need to first install `rstan`. Information on how to installing `rstan` on your machine can be found here: https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started.
 
 ## Base phenological model
 
@@ -27,26 +27,40 @@ dat <- simulate_data(M = 9)
 dat_spring <- subset(dat$data, dat$data$doy <= 200)
 ```
 
-**Note:** In order for the simulation function to work properly, the `MASS` package must be installed!
+**Note:** In order for the simulation function to work properly, the `MASS` package needs to be installed!
 
 The function returns a list containing 1) a data frame with the simulated data, 2) the parameters used for creating the simulated data, and 3) a plot of the simulated data. Following the simulation of the data, we subset the data to only include winter and spring observations. This step simply reduces the number of data points and thus the computational resources needed for sampling the posteriors. 
 
 Using the simulated data we can set up the model via the `rstan` interface. The  base phenological model for the start of season is called *base_pheno_spring.stan* and is located in the Stan folder:
 
 ```{r}
+# Load library
+
 library(rstan)
+
+# Set rstan settings
 
 rstan_options(auto_write = TRUE)
 options(mc.cores = 4)
 
-mu_beta <- matrix(c(0, # Season minimum 
-                    0.5, # Season amplitude
-                    0.15, # Green-up rate
-                    120, # Start of season
-                    0.0005), # Summer green-down
-                  ncol = max(dat_spring$pixel), nrow = 5)
+# Define a centering vector for centering the mean of the five phenological parameters
 
-sigma_beta_scale <- c(0, 0.05, 0.05, 10, 0.00001)
+mu_beta <- c(0, # Season minimum 
+             0.5, # Season amplitude
+             0.15, # Green-up rate
+             120, # Start of season
+             0.0005) # Summer green-down
+mu_beta <- matrix(mu_beta, ncol = max(dat_spring$pixel), nrow = 5) # Translate into a matrix with dimension: 5*n_pixel
+
+# Define a scaling vector for scaling the variances of the five phenological parameters
+
+sigma_beta_scale <- c(0, # Season minimum
+                      0.05, # Season amplitude
+                      0.05, # Green-up rate
+                      10, # Start of season
+                      0.00001) # Summer green-down
+
+# Gather the data into a list in order to pass it to Stan
 
 datalist <- list(N = nrow(dat_spring),
                  NY = max(dat_spring$year),
@@ -58,12 +72,14 @@ datalist <- list(N = nrow(dat_spring),
                  mu_beta = mu_beta,
                  sigma_beta_scale = sigma_beta_scale)
 
+# Pass the datalist and the model to Stam
+
 fit <- stan(file = "Stan/pheno_base_spring.stan", data = datalist, iter = 2000, chains = 4)
 ```
 
-First, we load the `rstan` library and tell the package to use four cores in parallel. Second, we define two vectors used for centering and scaling the five phenological parameters. This step is purely for numerical reasons and giving an informative centering and scaling vector significantly increases sampling speed. The vectors can be formulated based on prior knowledge or based on other data sources (i.e., climate data or phenological records). Here we set the vector according to the parameters used to simulate the time series. Third, we need to translate the data into a list in order to call it with `rstan` The data list is then given to the `stan` function together with the phenological model in the final line. The sampling is set to 2,000 interations (including 1,000 warm-up iterations) and four chains (run in parallel using four cores).
+First, we load the `rstan` library and tell the package to use four cores in parallel. Second, we define two vectors used for centering and scaling the five phenological parameters. This step is purely for numerical reasons and giving informative centering and scaling vectors significantly increases sampling speed. The vectors can be formulated based on prior knowledge or based on other data sources (i.e., climate data or phenological records). Here we set the vector according to the parameters used to simulate the time series. Third, we need to translate the data into a list in order to call it with `rstan` The data list is then given to the `stan` function together with the phenological model in the final line. The sampling is set to 2,000 interations (including 1,000 warm-up iterations) and four chains (run in parallel using four cores).
 
-There are several checks you need to perform on the resulting `stanfit` object in order to trust your results (i.e., convergence of chains, mixing between chains, among others). We won't go into detail here, but we strongly recommend reading the `rstan` documentation: https://cran.r-project.org/web/packages/rstan/vignettes/rstan.html. A relativel frequent convergence issue is called **divergent transitions**. Divergent trasitions indicate a serious problem that can either be erased by adapting the sampler settings (see: http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup) or by giving a more informative centering and scaling vector.
+There are several checks you need to perform on the resulting `stanfit` object in order to trust your results (i.e., convergence of chains, mixing between chains, among others). We won't go into detail here, but we strongly recommend reading the `rstan` documentation: https://cran.r-project.org/web/packages/rstan/vignettes/rstan.html. A relativel frequent convergence issue is called **divergent transitions**. Divergent trasitions indicate a serious problem that can either be erased by adapting the sampler settings (see: http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup) or by giving more informative centering and scaling vectors.
 
 We can inspect the posteriors using the `parameter_summary` function in the R folder. In particular, we can inspect the temporal variation in the start of season by plotting its median and 95% credible interval over the years:
 
@@ -71,6 +87,10 @@ We can inspect the posteriors using the `parameter_summary` function in the R fo
 source("R/parameter_summary.R")
 
 phi_summary <- parameter_summary(fit, type = "temporal")
+
+# Note that we make use of the ggplot2 package, which you need to load
+
+library(ggplot2)
 
 ggplot(phi_summary, aes(x = year, y = Q50)) +
   geom_point() +
@@ -92,7 +112,7 @@ ggplot(beta_summary, aes(x = factor(pixel), y = Q50)) +
 
 ### Real data
 
-We repeat the above shown exercise with real Landsat data aquired over braodleaved forest stands in the Bavarian Forest National Park in southern Germany. The data set is located in the data folder and stored as RData object. The data totals 100 Enhanced Vegetation Index (EVI) time series and are identical to the data used in the above mentioned publication.
+We repeat the above shown exercise with real Landsat data aquired over broadleaved forest stands in the Bavarian Forest National Park in southern Germany. The data set is located in the data folder and stored as RData object. The data totals 100 Enhanced Vegetation Index (EVI) time series and are identical to the data used in the above mentioned publication.
 
 ```{r}
 load("data/landsat_broadleaved_bavarian_forest.RData")
