@@ -24,8 +24,8 @@ parameters {
   // Prediction error scale
   real<lower=0> sigma;
   
-  // Vector for phi (centered)
-  vector[NY] phi_raw;
+  // Vector for phi
+  vector[NY] phi;
   
   // Scale parameters for phi
   real<lower=0> sigma_phi;
@@ -43,9 +43,6 @@ transformed parameters {
   // Sigma_beta (scaled)
   vector[5] sigma_beta;
   
-  // Vector for phi (non-centered)
-  vector[NY] phi;
-  
   // Scale sigma_beta
   for(i in 1:5)
     sigma_beta[i] = sigma_beta_raw[i] * sigma_beta_scale[i];
@@ -55,9 +52,6 @@ transformed parameters {
   
   // Backtransform Cholesky correlation matrix (LL') of beta 
   cor_beta = tcrossprod(cor_beta_L);
-  
-  // Reparameterize phi
-  phi = sigma_phi * phi_raw;
   
 }
 
@@ -75,7 +69,7 @@ model {
   sigma_beta_raw ~ cauchy(0, 1);
   
   // Prior for phi
-  phi_raw ~ normal(0, 1);
+  phi ~ normal(0, sigma_phi);
   
   // Prior for scale of phi
   sigma_phi ~ normal(0, 5);

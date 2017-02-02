@@ -5,9 +5,9 @@ This repository describes and documents a set of models used to estimate spatial
 
 **References**
 
-Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series. *Remote Sensing of Environment*
+Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*under review*) A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series. *Remote Sensing of Environment*.
 
-**Cite the code**
+**How to cite the code**
 
 If you use the code you might want to cite it using the following DOI:
 
@@ -128,7 +128,7 @@ We repeat the above shown exercise with real Landsat data aquired over broadleav
 ```{r}
 load("data/landsat_broadleaved_bavarian_forest.RData")
 
-dat_spring <- filter(dat, doy <= 200)
+dat_spring <- subset(dat, dat$doy <= 200)
 
 mu_beta <- matrix(c(0, 0.3, 0.15, 120, 0), ncol = max(dat$pixel), nrow = 5)
 
@@ -144,7 +144,7 @@ datalist <- list(N = nrow(dat_spring),
                  mu_beta = mu_beta,
                  sigma_beta_scale = sigma_beta_scale)
 
-fit <- stan(file = "Stan/pheno_base_sos.stan", data = datalist, iter = 2000, chains = 4)
+fit <- stan(file = "Stan/pheno_base_spring.stan", data = datalist, iter = 2000, chains = 4)
 ```
 
 We here also can inspect the temporal and spatial patterns of phenology:
