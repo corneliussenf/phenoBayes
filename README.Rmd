@@ -9,7 +9,7 @@ Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*in review*) A Bayesian hi
 
 **Cite the code**
 
-If you use the code you might want to cite it using the following code:
+If you use the code you might want to cite it using the following DOI:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.260099.svg)](https://doi.org/10.5281/zenodo.260099)
 
@@ -68,7 +68,7 @@ mu_beta <- matrix(mu_beta, ncol = max(dat_spring$pixel), nrow = 5) # Translate i
 sigma_beta_scale <- c(0, # Season minimum
                       0.05, # Season amplitude
                       0.05, # Green-up rate
-                      10, # Start of season
+                      5, # Start of season
                       0.00001) # Summer green-down
 
 # Gather the data into a list in order to pass it to Stan
