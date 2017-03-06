@@ -81,7 +81,7 @@ model {
   for(i in 1:N)
     y[i] = (beta[1, pixel[i]]) +
         ((beta[2, pixel[i]] - (beta[5, pixel[i]] * doy[i])) / 
-        (1 + exp(beta[3, pixel[i]] * (doy[i] - (beta[4, pixel[i]] + phi[year[i]])))));
+        (1 + exp(beta[3, pixel[i]] * (doy[i] - (beta[4, pixel[i]] - phi[year[i]])))));
   
   vi ~ normal(y, sigma);
   
