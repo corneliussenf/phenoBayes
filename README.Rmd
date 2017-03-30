@@ -5,11 +5,11 @@ This repository describes and documents a set of models used to estimate spatial
 
 **References**
 
-Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (*under review*) A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series. *Remote Sensing of Environment*.
+Senf, C., Pflugmacher D., Heurich, M. and Krueger T. (2017) A Bayesian hierarchical model for estimating spatial and temporal variation in vegetation phenology from Landsat time series. *Remote Sensing of Environment*, 194, 155-160.
 
 **How to cite the code**
 
-If you use the code you might want to cite it using the following DOI:
+If you use the code you might want to cite the above mentioned publication and the following DOI:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.260099.svg)](https://doi.org/10.5281/zenodo.260099)
 
